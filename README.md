@@ -1,4 +1,4 @@
-rest-api-client-2
-=================
+rest-api-client
+===============
 
 REST API Client
