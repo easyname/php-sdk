@@ -32,6 +32,8 @@ $api = new Easyname();
  */
 //$result = $api->listContact();
 //$result = $api->getContact(1);
+//$result = $api->createContact('person', 'John Doe (person)', 'John Doe', 'Street 12/34', '1234', 'Vienna', 'AT', '004312345678', 'me@example.com', array('birthday' => '1970-01-31'));
+//$result = $api->updateContact(1, 'John Doe (person)', 'Other Street 56/7', '1234', 'Vienna', '004312345678', 'me@example.com', array('birthplaceCity' => 'Vienna'));
 
 /*
  * DNS
