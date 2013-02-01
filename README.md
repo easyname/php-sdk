@@ -1,4 +1,5 @@
-rest-api-client
-===============
+easyname - PHP SDK
+==================
 
-REST API Client
+Use this SDK to interact easily with our REST API.
+Further documentation can be found on https://devblog.easyname.eu
