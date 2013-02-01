@@ -444,25 +444,78 @@ class Easyname
 
     /**
      * Create a contact.
+     *
+     * @param string $type
+     * @param string $alias
+     * @param string $name
+     * @param string $address
+     * @param string $zip
+     * @param string $city
+     * @param string $country
+     * @param string $phone
+     * @param string $email
+     * @param array|null $additionalData
+     * @return array
      */
-    /*
-    public function createContact()
+    public function createContact($type, $alias, $name, $address, $zip, $city, $country, $phone, $email, array $additionalData = array())
     {
-
+        return $this->_doRequest(
+            self::POST,
+            'contact',
+            null,
+            null,
+            null,
+            array_merge(
+                array(
+                    'type' => $type,
+                    'alias' => $alias,
+                    'name' => $name,
+                    'address' => $address,
+                    'zip' => $zip,
+                    'city' => $city,
+                    'country' => $country,
+                    'phone' => $phone,
+                    'email' => $email
+                ),
+                $additionalData
+            )
+        );
     }
-    */
 
     /**
      * Modify a specific contact.
      *
      * @param $id
+     * @param $alias
+     * @param $address
+     * @param $zip
+     * @param $city
+     * @param $phone
+     * @param $email
+     * @param array $additionalData
+     * @return array
      */
-    /*
-    public function updateContact($id)
+    public function updateContact($id, $alias, $address, $zip, $city, $phone, $email, array $additionalData = array())
     {
-
+        return $this->_doRequest(
+            self::POST,
+            'contact',
+            $id,
+            null,
+            null,
+            array_merge(
+                array(
+                    'alias' => $alias,
+                    'address' => $address,
+                    'zip' => $zip,
+                    'city' => $city,
+                    'phone' => $phone,
+                    'email' => $email
+                ),
+                $additionalData
+            )
+        );
     }
-    */
 
 
     /*
