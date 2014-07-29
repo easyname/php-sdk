@@ -2,7 +2,7 @@
 # Easyname REST API client configuration.
 #
 
-url: "https://api.easyname.com"
+url: "https://api.easyname.eu"
 user-id: 0
 user-email: "bob@example.com"
 api-key: "aaaaaaaa"
