@@ -1,38 +1,105 @@
 <?php
+/**
+ * @category   Easyname\RestApi
+ * @package    Easyname\RestApi
+ * @copyright  2006-2014 easyname GmbH (http://www.easyname.com)
+ * @license    easyname License Agreement
+ */
+namespace Easyname\RestApi;
 
 /**
  * Easyname REST API client.
  *
- * @category   Easyname
- * @copyright  Copyright 2006-present Nessus GmbH (http://www.nessus.at)
+ * @category   Easyname\RestApi
+ * @package    Easyname\RestApi
+ * @copyright  2006-2014 easyname GmbH (http://www.easyname.com)
  */
-class Easyname
+class Client
 {
     const POST = 'POST';
     const GET = 'GET';
-    const DEBUG = true;
-    const XDEBUG_KEY = 'phpStorm';
 
-    protected $_url;
-    protected $_apiKey;
-    protected $_apiAuthenticationSalt;
-    protected $_apiSigningSalt;
-    protected $_apiUserId;
-    protected $_apiEmail;
+    /**
+     * @var string
+     */
+    private $url;
+
+    /**
+     * @var string
+     */
+    private $apiKey;
+
+    /**
+     * @var string
+     */
+    private $apiAuthenticationSalt;
+
+    /**
+     * @var string
+     */
+    private $apiSigningSalt;
+
+    /**
+     * @var string
+     */
+    private $userId;
+
+    /**
+     * @var string
+     */
+    private $userEmail;
+
+    /**
+     * @var bool
+     */
+    private $debug = false;
+
+    /**
+     * @var string
+     */
+    private $xdebugKey;
 
     /**
      * Constructor loads all neccessary information from the yaml config file.
      */
-    public function __construct()
+    public function __construct(array $config = array())
     {
-        $config = yaml_parse_file(__FILE__.'/../config/config.yaml');
+        if (!function_exists('curl_init')) {
+            throw new Exception('CURL extension required');
+        }
 
-        $this->_url = $config['url'];
-        $this->_apiUserId = $config['user-id'];
-        $this->_apiEmail = $config['user-email'];
-        $this->_apiKey = $config['api-key'];
-        $this->_apiAuthenticationSalt = $config['api-authentication-salt'];
-        $this->_apiSigningSalt = $config['api-signing-salt'];
+        if (!$config) {
+            throw new Exception('No config given.');
+        }
+
+        $this->setConfig($config);
+    }
+
+    private function setConfig(array $config)
+    {
+        foreach ($config as $key => $c) {
+            if (is_array($c)) {
+                foreach ($c as $subKey => $subC) {
+                    if (strpos($subKey, '-') !== false) {
+                        $tmp = explode('-', $subKey);
+                        array_walk($tmp, function (&$item, $ignore) {
+                            $item = ucfirst($item);
+                        });
+                        $subKey = implode('', $tmp);
+                    }
+
+                    $method = 'set' . ucfirst($key) . ucfirst($subKey);
+                    if (method_exists($this, $method)) {
+                        $this->{$method}($subC);
+                    }
+                }
+            } else {
+                $method = 'set' . ucfirst($key);
+                if (method_exists($this, $method)) {
+                    $this->{$method}($c);
+                }
+            }
+        }
     }
 
     /**
@@ -47,7 +114,7 @@ class Easyname
      * @param null|int $offset
      * @return array
      */
-    private function _doRequest($type, $resource, $id = null, $subResource = null, $subId = null, array $data = null, $perform = null, $limit = null, $offset = null)
+    private function doRequest($type, $resource, $id = null, $subResource = null, $subId = null, array $data = null, $perform = null, $limit = null, $offset = null)
     {
         $uri = '/' . $resource;
         if ($id) {
@@ -66,22 +133,22 @@ class Easyname
             $uri .= '/' . $perform;
         }
 
-        if (self::DEBUG && self::XDEBUG_KEY) {
-            $uri .= '?XDEBUG_SESSION_START=' . self::XDEBUG_KEY;
+        if ($this->debuggingEnabled() && $this->getXdebugKey()) {
+            $uri .= '?XDEBUG_SESSION_START=' . $this->getXdebugKey();
         }
 
-        $url = $this->_url . $uri;
+        $url = $this->getUrl() . $uri;
         $curl = curl_init();
 
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $type);
         curl_setopt($curl, CURLOPT_HTTPHEADER,
             array(
-                'X-User-ApiKey:' . $this->_apiKey,
-                'X-User-Authentication:' . $this->_createApiAuthentication(),
+                'X-User-ApiKey:' . $this->getApiKey(),
+                'X-User-Authentication:' . $this->createApiAuthentication(),
                 'Accept:application/json',
                 'Content-Type: application/json',
-                'X-Readable-JSON:' . (self::DEBUG ? 1 : 0)
+                'X-Readable-JSON:' . ((int)$this->debuggingEnabled())
             )
         );
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -89,16 +156,16 @@ class Easyname
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
 
         if ($type === self::POST) {
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $this->_createBody($data));
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $this->createBody($data));
         }
 
-        $this->_debug($type . ': ' . $url);
+        $this->debug($type . ': ' . $url);
 
         $response = curl_exec($curl);
 
         curl_close($curl);
 
-        $this->_debug($response);
+        $this->debug($response);
 
         return json_decode($response, true);
     }
@@ -106,15 +173,15 @@ class Easyname
     /**
      * @return string
      */
-    private function _createApiAuthentication()
+    private function createApiAuthentication()
     {
         $authentication = base64_encode(
             md5(
-                sprintf($this->_apiAuthenticationSalt, $this->_apiUserId, $this->_apiEmail)
+                sprintf($this->getApiAuthenticationSalt(), $this->getUserId(), $this->getUserEmail())
             )
         );
 
-        $this->_debug($authentication);
+        $this->debug($authentication);
 
         return $authentication;
     }
@@ -123,7 +190,7 @@ class Easyname
      * @param array $data
      * @return string
      */
-    private function _createBody(array $data = null)
+    private function createBody(array $data = null)
     {
         if (!$data) {
             $data = array();
@@ -132,10 +199,10 @@ class Easyname
         $body = array(
             'data' => $data,
             'timestamp' => $timestamp,
-            'signature' => $this->_signRequest($data, $timestamp)
+            'signature' => $this->signRequest($data, $timestamp)
         );
 
-        $this->_debug($body);
+        $this->debug($body);
 
         return json_encode($body);
     }
@@ -145,7 +212,7 @@ class Easyname
      * @param int $timestamp
      * @return string
      */
-    private function _signRequest(array $data, $timestamp)
+    private function signRequest(array $data, $timestamp)
     {
         $keys = array_merge(array_keys($data), array('timestamp'));
         sort($keys);
@@ -163,9 +230,9 @@ class Easyname
         $length = $length%2 == 0 ? (int)($length/2) : (int)($length/2)+1;
         $strings = str_split($string, $length);
 
-        $signature = base64_encode(md5($strings[0] . $this->_apiSigningSalt . $strings[1]));
+        $signature = base64_encode(md5($strings[0] . $this->getApiSigningSalt() . $strings[1]));
 
-        $this->_debug($signature);
+        $this->debug($signature);
 
         return $signature;
     }
@@ -173,9 +240,9 @@ class Easyname
     /**
      * @param mixed $data
      */
-    private function _debug($data)
+    private function debug($data)
     {
-        if (self::DEBUG) {
+        if ($this->debuggingEnabled()) {
             $backtrace = debug_backtrace();
             echo date('Y-m-d H:i:s') . ' - ' . $backtrace[1]['function'] . ': ';
             if (is_array($data)) {
@@ -199,7 +266,7 @@ class Easyname
      */
     public function getDomain($id)
     {
-        return $this->_doRequest(self::GET, 'domain', $id);
+        return $this->doRequest(self::GET, 'domain', $id);
     }
 
     /**
@@ -211,7 +278,7 @@ class Easyname
      */
     public function listDomain($limit = null, $offset = null)
     {
-        return $this->_doRequest(self::GET, 'domain', null, null, null, null, null, $limit, $offset);
+        return $this->doRequest(self::GET, 'domain', null, null, null, null, null, $limit, $offset);
     }
 
     /**
@@ -235,7 +302,7 @@ class Easyname
             }
         }
 
-        return $this->_doRequest(
+        return $this->doRequest(
             self::POST,
             'domain',
             null,
@@ -283,7 +350,7 @@ class Easyname
             $tmpTransferAuthcode['transferAuthcode'] = $transferAuthcode;
         }
 
-        return $this->_doRequest(
+        return $this->doRequest(
             self::POST,
             'domain',
             null,
@@ -313,7 +380,7 @@ class Easyname
      */
     public function deleteDomain($id)
     {
-        return $this->_doRequest(self::POST, 'domain', $id, null, null, null, 'delete');
+        return $this->doRequest(self::POST, 'domain', $id, null, null, null, 'delete');
     }
 
     /**
@@ -324,7 +391,7 @@ class Easyname
      */
     public function restoreDomain($id)
     {
-        return $this->_doRequest(self::POST, 'domain', $id, null, null, null, 'restore');
+        return $this->doRequest(self::POST, 'domain', $id, null, null, null, 'restore');
     }
 
     /**
@@ -335,7 +402,7 @@ class Easyname
      */
     public function expireDomain($id)
     {
-        return $this->_doRequest(self::POST, 'domain', $id, null, null, null, 'expire');
+        return $this->doRequest(self::POST, 'domain', $id, null, null, null, 'expire');
     }
 
     /**
@@ -346,7 +413,7 @@ class Easyname
      */
     public function unexpireDomain($id)
     {
-        return $this->_doRequest(self::POST, 'domain', $id, null, null, null, 'unexpire');
+        return $this->doRequest(self::POST, 'domain', $id, null, null, null, 'unexpire');
     }
 
     /**
@@ -358,7 +425,7 @@ class Easyname
      */
     public function changeOwnerOfDomain($id, $registrantContact)
     {
-        return $this->_doRequest(self::POST, 'domain', $id, null, null, array('registrantContact' => $registrantContact), 'ownerchange');
+        return $this->doRequest(self::POST, 'domain', $id, null, null, array('registrantContact' => $registrantContact), 'ownerchange');
     }
 
     /**
@@ -372,7 +439,7 @@ class Easyname
      */
     public function changeContactOfDomain($id, $adminContact, $techContact, $zoneContact)
     {
-        return $this->_doRequest(
+        return $this->doRequest(
             self::POST,
             'domain',
             $id,
@@ -403,7 +470,7 @@ class Easyname
             }
         }
 
-        return $this->_doRequest(
+        return $this->doRequest(
             self::POST,
             'domain',
             $id,
@@ -427,7 +494,7 @@ class Easyname
      */
     public function getContact($id)
     {
-        return $this->_doRequest(self::GET, 'contact', $id);
+        return $this->doRequest(self::GET, 'contact', $id);
     }
 
     /**
@@ -439,7 +506,7 @@ class Easyname
      */
     public function listContact($limit = null, $offset = null)
     {
-        return $this->_doRequest(self::GET, 'contact', null, null, null, null, null, $limit, $offset);
+        return $this->doRequest(self::GET, 'contact', null, null, null, null, null, $limit, $offset);
     }
 
     /**
@@ -459,7 +526,7 @@ class Easyname
      */
     public function createContact($type, $alias, $name, $address, $zip, $city, $country, $phone, $email, array $additionalData = array())
     {
-        return $this->_doRequest(
+        return $this->doRequest(
             self::POST,
             'contact',
             null,
@@ -497,7 +564,7 @@ class Easyname
      */
     public function updateContact($id, $alias, $address, $zip, $city, $phone, $email, array $additionalData = array())
     {
-        return $this->_doRequest(
+        return $this->doRequest(
             self::POST,
             'contact',
             $id,
@@ -531,7 +598,7 @@ class Easyname
      */
     public function getDns($domainId, $id)
     {
-        return $this->_doRequest(self::GET, 'domain', $domainId, 'dns', $id);
+        return $this->doRequest(self::GET, 'domain', $domainId, 'dns', $id);
     }
 
     /**
@@ -542,7 +609,7 @@ class Easyname
      */
     public function listDns($domainId)
     {
-        return $this->_doRequest(self::GET, 'domain', $domainId, 'dns');
+        return $this->doRequest(self::GET, 'domain', $domainId, 'dns');
     }
 
     /**
@@ -558,7 +625,7 @@ class Easyname
      */
     public function createDns($domainId, $name = '', $type, $content, $priority = null, $ttl = null)
     {
-        return $this->_doRequest(
+        return $this->doRequest(
             self::POST,
             'domain',
             $domainId,
@@ -588,7 +655,7 @@ class Easyname
      */
     public function updateDns($domainId, $id, $name = '', $type, $content, $priority = null, $ttl = null)
     {
-        return $this->_doRequest(
+        return $this->doRequest(
             self::POST,
             'domain',
             $domainId,
@@ -613,7 +680,7 @@ class Easyname
      */
     public function deleteDns($domainId, $id)
     {
-        return $this->_doRequest(self::POST, 'domain', $domainId, 'dns', $id, null, 'delete');
+        return $this->doRequest(self::POST, 'domain', $domainId, 'dns', $id, null, 'delete');
     }
 
 
@@ -629,7 +696,7 @@ class Easyname
      */
     public function getDatabase($id)
     {
-        return $this->_doRequest(self::GET, 'database', $id);
+        return $this->doRequest(self::GET, 'database', $id);
     }
 
     /**
@@ -641,7 +708,7 @@ class Easyname
      */
     public function listDatabase($limit = null, $offset = null)
     {
-        return $this->_doRequest(self::GET, 'database', null, null, null, null, null, $limit, $offset);
+        return $this->doRequest(self::GET, 'database', null, null, null, null, null, $limit, $offset);
     }
 
 
@@ -657,7 +724,7 @@ class Easyname
      */
     public function getFtpAccount($id)
     {
-        return $this->_doRequest(self::GET, 'ftp-account', $id);
+        return $this->doRequest(self::GET, 'ftp-account', $id);
     }
 
     /**
@@ -669,6 +736,167 @@ class Easyname
      */
     public function listFtpAccount($limit = null, $offset = null)
     {
-        return $this->_doRequest(self::GET, 'ftp-account', null, null, null, null, null, $limit, $offset);
+        return $this->doRequest(self::GET, 'ftp-account', null, null, null, null, null, $limit, $offset);
+    }
+
+    /****************************************
+     * GETTER AND SETTER FOR CLIENT
+     */
+
+    /**
+     * @param string $apiAuthenticationSalt
+     */
+    public function setApiAuthenticationSalt($apiAuthenticationSalt)
+    {
+        $this->apiAuthenticationSalt = $apiAuthenticationSalt;
+    }
+
+    /**
+     * @throws Exception
+     * @return string
+     */
+    public function getApiAuthenticationSalt()
+    {
+        if (!$this->apiAuthenticationSalt) {
+            throw new Exception('API authentication salt not set.');
+        }
+        return $this->apiAuthenticationSalt;
+    }
+
+    /**
+     * @param string $userEmail
+     */
+    public function setUserEmail($userEmail)
+    {
+        $this->userEmail = $userEmail;
+    }
+
+    /**
+     * @throws Exception
+     * @return string
+     */
+    public function getUserEmail()
+    {
+        if (!$this->userEmail) {
+            throw new Exception('User email not set.');
+        }
+
+        return $this->userEmail;
+    }
+
+    /**
+     * @param string $apiKey
+     */
+    public function setApiKey($apiKey)
+    {
+        $this->apiKey = $apiKey;
+    }
+
+    /**
+     * @throws Exception
+     * @return string
+     */
+    public function getApiKey()
+    {
+        if (!$this->apiKey) {
+            throw new Exception('API key not set.');
+        }
+
+        return $this->apiKey;
+    }
+
+    /**
+     * @param string $apiSigningSalt
+     */
+    public function setApiSigningSalt($apiSigningSalt)
+    {
+        $this->apiSigningSalt = $apiSigningSalt;
+    }
+
+    /**
+     * @throws Exception
+     * @return string
+     */
+    public function getApiSigningSalt()
+    {
+        if (!$this->apiSigningSalt) {
+            throw new Exception('API signing salt not set.');
+        }
+
+        return $this->apiSigningSalt;
+    }
+
+    /**
+     * @param string $userId
+     */
+    public function setUserId($userId)
+    {
+        $this->userId = $userId;
+    }
+
+    /**
+     * @throws Exception
+     * @return string
+     */
+    public function getUserId()
+    {
+        if (!$this->userId) {
+            throw new Exception('User ID not set.');
+        }
+
+        return $this->userId;
+    }
+
+    /**
+     * @param boolean $debug
+     */
+    public function setDebug($debug)
+    {
+        $this->debug = (bool)$debug;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function debuggingEnabled()
+    {
+        return $this->debug;
+    }
+
+    /**
+     * @param string $url
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+    }
+
+    /**
+     * @throws Exception
+     * @return string
+     */
+    public function getUrl()
+    {
+        if (!$this->url) {
+            throw new Exception('Url not set.');
+        }
+
+        return $this->url;
+    }
+
+    /**
+     * @param string $xdebugKey
+     */
+    public function setXdebugKey($xdebugKey)
+    {
+        $this->xdebugKey = $xdebugKey;
+    }
+
+    /**
+     * @return string
+     */
+    public function getXdebugKey()
+    {
+        return $this->xdebugKey;
     }
 }

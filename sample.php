@@ -1,16 +1,17 @@
 <?php
-
 /**
  * Easyname REST API client sample usage.
  *
- * @category   Easyname
- * @copyright  Copyright 2006-present Nessus GmbH (http://www.nessus.at)
+ * @copyright  2006-2014 easyname GmbH (http://www.easyname.com)
+ * @license    easyname License Agreement
  */
 
-require_once 'src/Easyname.php';
+require_once 'src/Easyname/RestApi/Client.php';
 
 $result = null;
-$api = new Easyname();
+$api = new \Easyname\RestApi\Client(
+    include 'config/sample.config.php'
+);
 
 /*
  * Domain
