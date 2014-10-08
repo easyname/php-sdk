@@ -188,7 +188,7 @@ class Client
 
     /**
      * @param array $data
-     * @return string
+     * @return string Urlencoded string
      */
     private function createBody(array $data = null)
     {
@@ -204,7 +204,7 @@ class Client
 
         $this->debug($body);
 
-        return json_encode($body);
+        return urlencode(json_encode($body));
     }
 
     /**
