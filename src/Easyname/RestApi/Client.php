@@ -133,8 +133,24 @@ class Client
             $uri .= '/' . $perform;
         }
 
+        $uriParameters = array();
+
+        if ($type === self::GET) {
+            if ($offset !== null) {
+                $uriParameters['offset'] = (int)$offset;
+            }
+
+            if ($limit !== null) {
+                $uriParameters['limit'] = (int)$limit;
+            }
+        }
+
         if ($this->debuggingEnabled() && $this->getXdebugKey()) {
-            $uri .= '?XDEBUG_SESSION_START=' . $this->getXdebugKey();
+            $uriParameters['XDEBUG_SESSION_START'] = $this->getXdebugKey();
+        }
+
+        if ($uriParameters) {
+            $uri .= '?' . http_build_query($uriParameters);
         }
 
         $url = $this->getUrl() . $uri;
