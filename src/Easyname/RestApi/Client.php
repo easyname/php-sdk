@@ -18,6 +18,7 @@ class Client
 {
     const POST = 'POST';
     const GET = 'GET';
+    const DELETE = 'DELETE';
 
     /**
      * @var string
@@ -112,9 +113,10 @@ class Client
      * @param null|string $perform
      * @param null|int $limit
      * @param null|int $offset
+     * @param null|int|array $filter
      * @return array
      */
-    private function doRequest($type, $resource, $id = null, $subResource = null, $subId = null, array $data = null, $perform = null, $limit = null, $offset = null)
+    private function doRequest($type, $resource, $id = null, $subResource = null, $subId = null, array $data = null, $perform = null, $limit = null, $offset = null, $filter = null)
     {
         $uri = '/' . $resource;
         if ($id) {
@@ -142,6 +144,14 @@ class Client
 
             if ($limit !== null) {
                 $uriParameters['limit'] = (int)$limit;
+            }
+
+            if ($filter !== null) {
+                if (is_array($filter)) {
+                    $uriParameters['filter'] = implode(',',$filter);
+                } else {
+                    $uriParameters['filter'] = (int)$filter;
+                }
             }
         }
 
@@ -290,11 +300,12 @@ class Client
      *
      * @param null|int $limit
      * @param null|int $offset
+     * @param null|int|array $filter
      * @return array
      */
-    public function listDomain($limit = null, $offset = null)
+    public function listDomain($limit = null, $offset = null, $filter = null)
     {
-        return $this->doRequest(self::GET, 'domain', null, null, null, null, null, $limit, $offset);
+        return $this->doRequest(self::GET, 'domain', null, null, null, null, null, $limit, $offset, $filter);
     }
 
     /**
@@ -518,11 +529,12 @@ class Client
      *
      * @param int|null $limit
      * @param int|null $offset
+     * @param null|int|array $filter
      * @return array
      */
-    public function listContact($limit = null, $offset = null)
+    public function listContact($limit = null, $offset = null, $filter = null)
     {
-        return $this->doRequest(self::GET, 'contact', null, null, null, null, null, $limit, $offset);
+        return $this->doRequest(self::GET, 'contact', null, null, null, null, null, $limit, $offset, $filter);
     }
 
     /**
@@ -600,6 +612,20 @@ class Client
         );
     }
 
+    /**
+     * Delete the specified contact
+     *
+     * @param int $id
+     * @return array
+     */
+    public function deleteContact($id)
+    {
+        return $this->doRequest(
+            self::DELETE,
+            'contact',
+            $id
+        );
+    }
 
     /*
      * DNS
