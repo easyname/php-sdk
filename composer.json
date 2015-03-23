@@ -1,0 +1,27 @@
+{
+    "name": "cwd/easyname-php-sdk",
+    "description": "Easyname PHP SDK",
+    "keywords": ["easynane", "domain"],
+    "homepage": "https://github.com/cwd/php-sdk",
+    "license": "easyname License Agreement",
+    "authors": [
+        {
+            "name": "Easyname GmbH",
+            "email": "office@easyname.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "autoload": {
+        "classmap": [
+            "src/"
+        ]
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
+
