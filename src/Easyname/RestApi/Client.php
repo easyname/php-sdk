@@ -2,7 +2,7 @@
 /**
  * @category   Easyname\RestApi
  * @package    Easyname\RestApi
- * @copyright  2006-2014 easyname GmbH (http://www.easyname.com)
+ * @copyright  2006-2016 easyname GmbH (http://www.easyname.com)
  * @license    easyname License Agreement
  */
 namespace Easyname\RestApi;
@@ -12,7 +12,7 @@ namespace Easyname\RestApi;
  *
  * @category   Easyname\RestApi
  * @package    Easyname\RestApi
- * @copyright  2006-2014 easyname GmbH (http://www.easyname.com)
+ * @copyright  2006-2016 easyname GmbH (http://www.easyname.com)
  */
 class Client
 {
@@ -779,6 +779,21 @@ class Client
     public function listFtpAccount($limit = null, $offset = null)
     {
         return $this->doRequest(self::GET, 'ftp-account', null, null, null, null, null, $limit, $offset);
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function getUserBalance()
+    {
+        return $this->doRequest(
+            self::GET,
+            'user',
+            $this->getUserId(),
+            'balance',
+            null
+        );
     }
 
     /****************************************

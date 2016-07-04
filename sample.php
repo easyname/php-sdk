@@ -2,7 +2,7 @@
 /**
  * Easyname REST API client sample usage.
  *
- * @copyright  2006-2014 easyname GmbH (http://www.easyname.com)
+ * @copyright  2006-2016 easyname GmbH (http://www.easyname.com)
  * @license    easyname License Agreement
  */
 

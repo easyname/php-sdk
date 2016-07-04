@@ -2,7 +2,7 @@
 /**
  * @category   Easyname\RestApi
  * @package    Easyname\RestApi 
- * @copyright  2006-2014 easyname GmbH (http://www.easyname.com)
+ * @copyright  2006-2016 easyname GmbH (http://www.easyname.com)
  * @license    easyname License Agreement
  */
 namespace Easyname\RestApi;
@@ -12,7 +12,7 @@ namespace Easyname\RestApi;
  *
  * @category   Easyname\RestApi
  * @package    Easyname\RestApi 
- * @copyright  2006-2014 easyname GmbH (http://www.easyname.com)
+ * @copyright  2006-2016 easyname GmbH (http://www.easyname.com)
  */
 class Exception extends \Exception
 {

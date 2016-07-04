@@ -6,6 +6,6 @@ Further documentation can be found on https://devblog.easyname.com
 
 Requirements
 ------------
-- PHP >= 5.3
+- PHP >= 5.4.0
 - JSON support
 - CURL support
