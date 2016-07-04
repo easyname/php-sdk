@@ -1,0 +1,22 @@
+{
+  "name": "easyname/rest-api-php-sdk",
+  "type": "library",
+  "version": "1.0.1",
+  "description": "Rest-API PHP SDK for the easyname API",
+  "keywords": ["easyname", "rest", "api", "domain", "hosting", "webspace"],
+  "homepage": "https://www.easyname.com",
+  "authors": [
+    {
+      "name": "Martin Ras",
+      "email": "mr@easyname.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "autoload": {
+    "psr-0": {
+      "Easyname\\RestApi\\": "src/"
+    }
+  }
+}
