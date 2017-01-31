@@ -9,3 +9,7 @@ Requirements
 - PHP >= 5.4.0
 - JSON support
 - CURL support
+
+Notice
+------------
+- DNS operations do not work (systemerror, since 20. March 2015)
