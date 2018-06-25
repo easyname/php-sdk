@@ -40,26 +40,4 @@ $api = new \Easyname\RestApi\Client(
 //$result = $api->updateContact(1, 'John Doe (person)', 'Other Street 56/7', '1234', 'Vienna', '+4312345678', 'me@example.com', array('birthplaceCity' => 'Vienna'));
 //$result = $api->deleteContact(1);
 
-/*
- * DNS
- */
-//$result = $api->listDns(1);
-//$result = $api->getDns(1, 1);
-//$result = $api->createDns(1, '*', 'A', '127.0.0.1');
-//$result = $api->updateDns(1, 2, '*', 'A', '127.0.0.1');
-//$result = $api->deleteDns(1, 2);
-
-/*
- * FTP-account
- */
-//$result = $api->listFtpAccount();
-//$result = $api->getFtpAccount(1);
-
-/*
- * Database
- */
-//$result = $api->listDatabase();
-//$result = $api->getDatabase(1);
-
-
 var_dump($result);
