@@ -324,7 +324,7 @@ class Client
     {
         $tmpNameservers = array();
         for ($i = 0; $i < 6; $i++) {
-            if ($nameservers[$i]) {
+            if (isset($nameservers[$i])) {
                 $tmpNameservers['nameserver' . ($i+1)] = $nameservers[$i];
             }
         }
@@ -367,7 +367,7 @@ class Client
     {
         $tmpNameservers = array();
         for ($i = 0; $i < 6; $i++) {
-            if ($nameservers[$i]) {
+            if (isset($nameservers[$i])) {
                 $tmpNameservers['nameserver' . ($i+1)] = $nameservers[$i];
             }
         }
