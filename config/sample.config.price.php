@@ -1,5 +1,6 @@
 <?php
 
+// todo: Feature-Request - Easyname TICKET #522293
 return [
     'currency' => 'Euro',
     'lastPriceUpdate' => '2018-11-13 00:00:00',
