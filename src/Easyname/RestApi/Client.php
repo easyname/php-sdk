@@ -309,6 +309,19 @@ class Client
     }
 
     /**
+     * List Domain Price (Static)
+     *
+     * @param null|int $limit
+     * @param null|int $offset
+     * @param null|int|array $filter
+     * @return array
+     */
+    public function listDomainPrice($limit = null, $offset = null, $filter = null)
+    {
+		return $this->getDomainPrice();
+    }
+
+    /**
      * Register a new domain name.
      *
      * @param string $domain
@@ -786,6 +799,27 @@ class Client
         }
 
         return $this->url;
+    }
+
+    /**
+     * @param array $domainPrice
+     */
+    public function setDomainPrice($domainPrice)
+    {
+        $this->domainPrice = $domainPrice;
+    }
+
+    /**
+     * @throws Exception
+     * @return array
+     */
+    public function getDomainPrice()
+    {
+        if (!$this->domainPrice) {
+            throw new Exception('domainPrice not set.');
+        }
+
+        return $this->domainPrice;
     }
 
     /**

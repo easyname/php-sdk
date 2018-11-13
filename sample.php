@@ -19,6 +19,7 @@ $api = new \Easyname\RestApi\Client(
 /*
  * Domain
  */
+$result = $api->listDomainPrice();
 //$result = $api->listDomain();
 //$result = $api->getDomain(1);
 //$result = $api->createDomain("example.com", 23, 23, 23, 23, array(), false);
@@ -40,4 +41,5 @@ $api = new \Easyname\RestApi\Client(
 //$result = $api->updateContact(1, 'John Doe (person)', 'Other Street 56/7', '1234', 'Vienna', '+4312345678', 'me@example.com', array('birthplaceCity' => 'Vienna'));
 //$result = $api->deleteContact(1);
 
+echo "<pre>\n";
 var_dump($result);
