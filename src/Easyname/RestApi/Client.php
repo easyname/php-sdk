@@ -305,7 +305,27 @@ class Client
      */
     public function listDomain($limit = null, $offset = null, $filter = null)
     {
-        return $this->doRequest(self::GET, 'domain', null, null, null, null, null, $limit, $offset, $filter);
+        // fixme: listDomainLimit50Bug - Easyname TICKET 521312
+        $limitBug = true;
+        $limitCnt = 50;
+        $retList = null;
+        $limit = is_null($limit) ? $limitCnt : $limit;
+        $offset = is_null($offset) ? 0 : $offset;
+        while ($limitBug) {
+            $request = $this->doRequest(self::GET, 'domain', null, null, null, null, null, $limit, $offset, $filter);
+            $foundData = isset($request['data']);
+            $limitBug = ($foundData && count($request['data']) == $limitCnt);
+            $offset = $offset + $limitCnt;
+            if (!isset($retList['data'])) {
+                $retList = $request;
+            } elseif ($foundData) {
+                $retList['data'] = array_merge($retList['data'], $request['data']);
+            }
+            if ($limitBug) {
+                $this->debug('listDomainLimit50Bug: New offset ' . $offset);
+            }
+        }
+        return $retList;
     }
 
     /**
