@@ -575,7 +575,7 @@ class Client
         $limit = is_null($limit) ? $limitCnt : $limit;
         $offset = is_null($offset) ? 0 : $offset;
         while ($limitBug) {
-			$request = $this->doRequest(self::GET, 'contact', null, null, null, null, null, $limit, $offset, $filter);
+            $request = $this->doRequest(self::GET, 'contact', null, null, null, null, null, $limit, $offset, $filter);
             $foundData = isset($request['data']);
             $limitBug = ($foundData && count($request['data']) == $limitCnt);
             $offset = $offset + $limitCnt;
