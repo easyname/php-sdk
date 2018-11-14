@@ -825,7 +825,7 @@ class Client
     /**
      * @param array $domainPrice
      */
-    public function setDomainPrice($domainPrice)
+    private function setDomainPrice($domainPrice)
     {
         $this->domainPrice = $domainPrice;
     }
@@ -834,7 +834,7 @@ class Client
      * @throws Exception
      * @return array
      */
-    public function getDomainPrice()
+    private function getDomainPrice()
     {
         if (!$this->domainPrice) {
             throw new Exception('domainPrice not set.');
