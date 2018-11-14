@@ -318,8 +318,8 @@ class Client
      */
     public function listDomainPrice($limit = null, $offset = null, $filter = null)
     {
-		// todo: Feature-Request - Easyname TICKET #522293
-		return $this->getDomainPrice();
+        // todo: Feature-Request - Easyname TICKET #522293
+        return $this->getDomainPrice();
     }
 
     /**
