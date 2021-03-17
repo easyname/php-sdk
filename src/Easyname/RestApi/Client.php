@@ -578,41 +578,6 @@ class Client
     }
 
     /**
-     * Modify a specific contact.
-     *
-     * @param $id
-     * @param $alias
-     * @param $address
-     * @param $zip
-     * @param $city
-     * @param $phone
-     * @param $email
-     * @param array $additionalData
-     * @return array
-     */
-    public function updateContact($id, $alias, $address, $zip, $city, $phone, $email, array $additionalData = array())
-    {
-        return $this->doRequest(
-            self::POST,
-            'contact',
-            $id,
-            null,
-            null,
-            array_merge(
-                array(
-                    'alias' => $alias,
-                    'address' => $address,
-                    'zip' => $zip,
-                    'city' => $city,
-                    'phone' => $phone,
-                    'email' => $email
-                ),
-                $additionalData
-            )
-        );
-    }
-
-    /**
      * Delete the specified contact
      *
      * @param int $id
